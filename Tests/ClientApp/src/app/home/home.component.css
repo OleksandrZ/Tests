@@ -1,0 +1,17 @@
+.crop {
+  overflow: hidden;
+  height: 60px;
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.crop-title{
+  overflow: hidden;
+  height: 40px;
+  line-height: 40px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}

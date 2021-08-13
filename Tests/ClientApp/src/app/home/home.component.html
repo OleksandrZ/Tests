@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-sm-6 mt-2" *ngFor="let test of tests">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title crop-title">{{test.title}}</h5>
+        <p class="card-text crop">{{test.description}}</p>
+        <a [routerLink]="['test/'+ test.id]" class="btn btn-primary">Start test</a>
+      </div>
+    </div>
+  </div>
+</div>

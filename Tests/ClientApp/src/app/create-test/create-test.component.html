@@ -1,0 +1,60 @@
+<div class="wrapper-grid-10">
+  <div class="first-container">
+    <form [formGroup]="createTestForm" (ngSubmit)="onSubmit()">
+      <h1>Test creation</h1>
+      <div class="row mb-3 ml-1">
+        <label for="title" class="col-sm-3 col-form-label">Test's title:</label>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="title" formControlName="title">
+        </div>
+      </div>
+      <div class="row mb-3 ml-1">
+        <label for="description" class="col-sm-3 col-form-label short-info">Test's description:</label>
+        <div class="col-sm-6">
+          <textarea class="form-control" id="short-info" formControlName="description"></textarea>
+        </div>
+      </div>
+      <h4>Questions:</h4>
+      <div formArrayName="questions">
+        <div *ngFor="let question of questions.controls; let questionIndex=index">
+          <div [formGroupName]="questionIndex">
+            <div class="row mb-3 ml-1">
+              <label for="questionTitle" class="col-sm-3 col-form-label">Question's title:</label>
+              <div class="col-sm-6">
+                <input type="text" class="form-control" id="questionTitle" formControlName="questionTitle">
+              </div>
+              <div class="col-sm-1 d-flex justify-content-center">
+                <button class="btn btn-danger align-self-center" *ngIf="questions.length > 1"
+                  (click)="removeQuestion(questionIndex)" type="button">&#8211;</button>
+              </div>
+            </div>
+            <h5 class="ml-4">Answers (* - correct answer):</h5>
+            <div formArrayName="answers">
+              <div *ngFor="let item of questionAnswers(questionIndex).controls; let answerIndex = index">
+                <div [formGroupName]="answerIndex">
+                  <div class="row mb-3 ml-2">
+
+                    <label for="answerDescription" class="col-sm-3 col-form-label">Answer's description <small
+                        *ngIf="answerIndex === 0">* </small>:</label>
+                    <div class="col-sm-6">
+                      <input type="text" class="form-control" id="answerDescription"
+                        formControlName="answerDescription">
+                    </div>
+                    <div class="col-sm-1 d-flex justify-content-center">
+                      <button class="btn btn-danger align-self-center" *ngIf="questionAnswers(questionIndex).length > 2"
+                        (click)="removeQuestionAnswer(questionIndex, answerIndex)" type="button">&#8211;</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <button class="btn btn-outline-dark" type="button" (click)="addQuestionAnswer(questionIndex)">Add
+            answer</button>
+        </div>
+      </div>
+  <button class="btn btn-outline-dark mt-2" type="button" (click)="addQuestion()">Add question</button>
+</div>
+<button class="btn btn-outline-dark mt-2" type="button" (click)="onSubmit()">Submit</button>
+</form>
+</div>
+</div>

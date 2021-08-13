@@ -1,0 +1,45 @@
+<div class="container my-1" *ngIf="test">
+  <h3>{{test.title}}</h3>
+  <form [formGroup]="startTestForm" class="d-flex flex-column" *ngIf="!isStarted" (submit)="start($event)">
+    <p>{{test.description}}</p>
+    <div class="start">
+      <input type="checkbox" name="" id="start" formControlName="start">
+      <label for="start"> I agree to start </label>
+      <div class="alert alert-danger"
+        *ngIf="startTestForm.controls.start.invalid && (startTestForm.controls.start.dirty || startTestForm.controls.start.touched)">
+        Checkbox is required to be checked
+      </div>
+    </div>
+    <button class="btn btn-success proceed">Proceed</button>
+  </form>
+  <div *ngIf="isStarted && !isTestResult">
+    <p>{{indexCurrentQuestion + 1}} of {{totalQuestions}}</p>
+    <div class="question ml-sm-5 pl-sm-5 pt-2" *ngFor="let question of test.questions; let i = index"
+      [hidden]="i !== indexCurrentQuestion">
+      <div class="py-2 h5"><b>Q. {{question.title}}</b></div>
+      <div class="ml-md-3 ml-sm-3 pl-md-5 pt-sm-0 pt-3" id="options">
+        <label class="options" *ngFor="let answer of question.answers">{{answer.description}}
+          <input type="radio" name="{{question.id}}" value="{{answer.id}}"
+            (change)="onAnswerChange($event.target.value)">
+          <span class="checkmark"></span> </label>
+      </div>
+    </div>
+    <div class="d-flex align-items-center width pt-3">
+      <button class="btn btn-secondary flex-fill me-3" (click)="prev()"
+        *ngIf="indexCurrentQuestion > 0">Previous</button>
+      <button class="btn btn-success flex-fill" (click)="next()">
+        <div *ngIf="indexCurrentQuestion < totalQuestions - 1">Next</div>
+        <div *ngIf="indexCurrentQuestion === totalQuestions - 1">Submit</div>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="isTestResult">
+    <h5>Result:</h5>
+    <p>{{testResult.totalCorrectAnswers}} out of {{testResult.maxCorrectAnswers}}</p>
+    <h6 *ngIf="testResult.totalCorrectAnswers >= testResult.minCorrectAnswers">You passed</h6>
+    <h6 *ngIf="testResult.totalCorrectAnswers < testResult.minCorrectAnswers">You failed</h6>
+    <button class="btn btn-success" [routerLink]="['/']">
+      Back to tests
+    </button>
+  </div>
+</div>
