@@ -9,6 +9,6 @@ namespace Tests.Models
     public class TestsUser : IdentityUser
     {
         public ICollection<AvailableTests> AvailableTests { get; set; }
-        //public ICollection<Test> FailedTests { get; set; }
+        public ICollection<PassedTests> PassedTests { get; set; }
     }
 }

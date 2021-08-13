@@ -33,8 +33,9 @@ namespace Tests.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TestDto>>> GetTests()
         {
+            //get available to user tests
             var user = await context.Users
-               .Include(x =>x.AvailableTests)
+               .Include(x => x.AvailableTests)
                .ThenInclude(x => x.Test)
                .ThenInclude(x => x.Questions)
                .ThenInclude(x => x.Answers)
@@ -44,6 +45,7 @@ namespace Tests.Controllers
             if (user == null)
                 return Unauthorized();
 
+            //populate list of testdtos
             List<TestDto> testDtos = new List<TestDto>();
             TestDto testDto;
             foreach (var availableTests in user.AvailableTests)
@@ -91,11 +93,13 @@ namespace Tests.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TestDto>> GetTest(string id)
         {
-            var test = await context.Tests
-                .Include(x => x.Author)
-                .Include(x => x.Questions)
-                .ThenInclude(x => x.Answers)
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var user = await context.Users
+              .Include(x => x.AvailableTests)
+              .ThenInclude(x => x.Test)
+              .ThenInclude(x => x.Questions)
+              .ThenInclude(x => x.Answers)
+              .FirstOrDefaultAsync(x => x.UserName == currentUserAccessor.GetCurrentUsername());
+            var test = user.AvailableTests.FirstOrDefault(x => x.TestId == id).Test;
 
             if (test == null)
             {
@@ -181,20 +185,20 @@ namespace Tests.Controllers
         }
 
         // DELETE: api/Tests/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTest(string id)
-        {
-            var test = await context.Tests.FindAsync(id);
-            if (test == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteTest(string id)
+        //{
+        //    var test = await context.Tests.FindAsync(id);
+        //    if (test == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            context.Tests.Remove(test);
-            await context.SaveChangesAsync();
+        //    context.Tests.Remove(test);
+        //    await context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: api/Tests/checktest
         [HttpPost("checktest")]
@@ -202,10 +206,18 @@ namespace Tests.Controllers
         {
             if (TestExists(userAnswersDto.FirstOrDefault()?.TestId))
             {
+                var user = await userManager.FindByNameAsync(currentUserAccessor.GetCurrentUsername());
                 var test = await context.Tests
                     .Include(x => x.Questions)
                     .ThenInclude(x => x.Answers)
                     .FirstOrDefaultAsync(x => x.Id == userAnswersDto.FirstOrDefault().TestId);
+
+                List<UserAnswer> userAnswers = new List<UserAnswer>();
+                PassedTests passedTestResult = new PassedTests()
+                {
+                    Test = test,
+                    Id = Guid.NewGuid().ToString()
+                };
 
                 TestResultDto testResult = new()
                 {
@@ -216,10 +228,44 @@ namespace Tests.Controllers
                 foreach (var answer in userAnswersDto)
                 {
                     var question = test.Questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                    if (question?.Answers.FirstOrDefault(x => x.Id == answer.AnswerId)?.IsAnswer == true)
+                    var Answer = question?.Answers.FirstOrDefault(x => x.Id == answer.AnswerId);
+                    if (Answer != null)
                     {
-                        testResult.TotalCorrectAnswers++;
+                        if(Answer.IsAnswer == true)
+                        {
+                            testResult.TotalCorrectAnswers++;
+                        }
+                        userAnswers.Add(new UserAnswer()
+                        {
+                            Answer = Answer,
+                            Question = question,
+                            Id = Guid.NewGuid().ToString()
+                        });
                     }
+                }
+
+                passedTestResult.Answers = userAnswers;
+                passedTestResult.TotalScore = testResult.TotalCorrectAnswers;
+
+                context.PassedTests.Add(passedTestResult);
+
+                //If user passed test remove test from available tests
+                if (testResult.TotalCorrectAnswers >= testResult.MinCorrectAnswers)
+                {
+                    context.AvailableTests
+                        .Remove(await context
+                                    .AvailableTests
+                                    .Include(x => x.Test)
+                                    .FirstOrDefaultAsync(x => x.TestId == test.Id));
+                }
+
+                try
+                {
+                    await context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    throw;
                 }
 
                 return Ok(testResult);

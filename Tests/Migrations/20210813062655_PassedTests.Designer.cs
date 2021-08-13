@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tests.Models;
 
 namespace Tests.Migrations
 {
     [DbContext(typeof(TestsDbContext))]
-    partial class TestsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210813062655_PassedTests")]
+    partial class PassedTests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

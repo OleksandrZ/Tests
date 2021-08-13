@@ -11,9 +11,9 @@ namespace Tests.Models
     public class TestsDbContext : IdentityDbContext<TestsUser>
     {
         public DbSet<Test> Tests { get; set; }
-        public DbSet<TestsUser> Users { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<AvailableTests> AvailableTests { get; set; }
+        public DbSet<PassedTests> PassedTests { get; set; }
         public TestsDbContext(DbContextOptions options) : base(options)
         {
         }
